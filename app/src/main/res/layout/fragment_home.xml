@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -28,7 +27,6 @@
                 android:id="@+id/tvName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:drawableRight="@drawable/ic_arrow_down"
                 android:drawablePadding="6dp"
                 android:ellipsize="marquee"
                 android:focusable="true"
@@ -39,28 +37,30 @@
                 android:text="@string/app_name"
                 android:textAlignment="gravity"
                 android:textColor="@color/text_gray"
-                android:textSize="16dp" />
+                android:textSize="16sp"
+                app:drawableRightCompat="@drawable/ic_arrow_down" />
 
         </LinearLayout>
 
         <TextView
             android:id="@+id/search"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="36dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="6dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="6dp"
             android:layout_weight="1"
             android:background="@drawable/bg_large_round_gray"
-            android:drawableRight="@drawable/ic_search_18"
-            android:drawableTint="@color/gray_darker"
             android:gravity="center_vertical"
-            android:hint="搜索"
-            android:paddingHorizontal="12sp" />
+            android:hint="@string/home_search"
+            android:paddingHorizontal="12sp"
+            app:drawableRightCompat="@drawable/ic_search_18"
+            app:drawableTint="@color/gray_darker" />
 
         <ImageView
             android:id="@+id/iv_collect"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:contentDescription="@string/home_collect"
             android:padding="8dp"
             android:src="@drawable/ic_collect_48" />
 
@@ -68,6 +68,7 @@
             android:id="@+id/iv_history"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:contentDescription="@string/home_history"
             android:padding="8dp"
             android:src="@drawable/ic_history_48" />
 
