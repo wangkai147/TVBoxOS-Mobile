@@ -1,385 +1,338 @@
-package com.github.tvbox.osc.ui.fragment;
+package com.github.tvbox.osc.ui.fragment
 
-import android.content.Intent;
-import android.os.Bundle;
+import android.annotation.SuppressLint
+import android.content.Intent
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.view.View
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DiffUtil
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.blankj.utilcode.util.ToastUtils
+import com.github.tvbox.osc.R
+import com.github.tvbox.osc.api.ApiConfig
+import com.github.tvbox.osc.api.ApiConfig.LoadConfigCallback
+import com.github.tvbox.osc.base.App
+import com.github.tvbox.osc.base.BaseVbFragment
+import com.github.tvbox.osc.bean.AbsSortXml
+import com.github.tvbox.osc.bean.MovieSort.SortData
+import com.github.tvbox.osc.bean.SourceBean
+import com.github.tvbox.osc.databinding.FragmentHomeBinding
+import com.github.tvbox.osc.server.ControlManager
+import com.github.tvbox.osc.ui.activity.CollectActivity
+import com.github.tvbox.osc.ui.activity.FastSearchActivity
+import com.github.tvbox.osc.ui.activity.HistoryActivity
+import com.github.tvbox.osc.ui.activity.MainActivity
+import com.github.tvbox.osc.ui.activity.SubscriptionActivity
+import com.github.tvbox.osc.ui.adapter.SelectDialogAdapter.SelectDialogInterface
+import com.github.tvbox.osc.ui.dialog.SelectDialog
+import com.github.tvbox.osc.ui.dialog.TipDialog
+import com.github.tvbox.osc.util.DefaultConfig
+import com.github.tvbox.osc.util.HawkConfig
+import com.github.tvbox.osc.viewmodel.SourceViewModel
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
+import com.orhanobut.hawk.Hawk
+import com.owen.tvrecyclerview.widget.TvRecyclerView
+import com.owen.tvrecyclerview.widget.V7GridLayoutManager
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.DiffUtil;
-
-import android.os.Handler;
-import android.view.Gravity;
-import android.widget.TextView;
-
-import com.angcyo.tablayout.delegate.ViewPager1Delegate;
-import com.blankj.utilcode.util.ConvertUtils;
-import com.blankj.utilcode.util.ToastUtils;
-import com.github.tvbox.osc.R;
-import com.github.tvbox.osc.api.ApiConfig;
-import com.github.tvbox.osc.base.App;
-import com.github.tvbox.osc.base.BaseLazyFragment;
-import com.github.tvbox.osc.base.BaseVbFragment;
-import com.github.tvbox.osc.bean.AbsSortXml;
-import com.github.tvbox.osc.bean.MovieSort;
-import com.github.tvbox.osc.bean.SourceBean;
-import com.github.tvbox.osc.databinding.FragmentHomeBinding;
-import com.github.tvbox.osc.server.ControlManager;
-
-import com.github.tvbox.osc.ui.activity.CollectActivity;
-import com.github.tvbox.osc.ui.activity.FastSearchActivity;
-import com.github.tvbox.osc.ui.activity.HistoryActivity;
-import com.github.tvbox.osc.ui.activity.MainActivity;
-import com.github.tvbox.osc.ui.activity.SettingActivity;
-import com.github.tvbox.osc.ui.activity.SubscriptionActivity;
-import com.github.tvbox.osc.ui.adapter.SelectDialogAdapter;
-import com.github.tvbox.osc.ui.dialog.SelectDialog;
-import com.github.tvbox.osc.ui.dialog.TipDialog;
-import com.github.tvbox.osc.util.DefaultConfig;
-import com.github.tvbox.osc.util.HawkConfig;
-import com.github.tvbox.osc.viewmodel.SourceViewModel;
-import com.orhanobut.hawk.Hawk;
-import com.owen.tvrecyclerview.widget.TvRecyclerView;
-import com.owen.tvrecyclerview.widget.V7GridLayoutManager;
-
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class HomeFragment extends BaseVbFragment<FragmentHomeBinding> {
-    private SourceViewModel sourceViewModel;
-    private List<BaseLazyFragment> fragments = new ArrayList<>();
-    private Handler mHandler = new Handler();
+class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
+    private lateinit var sourceViewModel: SourceViewModel
+    private val fragments = ArrayList<Fragment>()
+    private val mHandler = Handler(Looper.getMainLooper())
 
     /**
      * 顶部tabs分类集合,用于渲染tab页,每个tab对应fragment内的数据
      */
-    private List<MovieSort.SortData> mSortDataList = new ArrayList<>();
-    private boolean dataInitOk = false;
-    private boolean jarInitOk = false;
+    private var mSortDataList: List<SortData> = ArrayList()
+    private var dataInitOk = false
+    private var jarInitOk = false
 
 
-    @Override
-    protected void init() {
-        ControlManager.get().startServer();
+    override fun init() {
+        ControlManager.get().startServer()
 
-        mBinding.nameContainer.setOnClickListener(v -> {
-            if(dataInitOk && jarInitOk){
-                showSiteSwitch();
-            }else {
-                ToastUtils.showShort("数据源未加载，长按刷新或切换订阅");
-            }
-        });
-
-        mBinding.nameContainer.setOnLongClickListener(v -> {
-            refreshHomeSouces();
-            return true;
-        });
-
-        mBinding.search.setOnClickListener(view -> jumpActivity(FastSearchActivity.class));
-        mBinding.ivHistory.setOnClickListener(view -> jumpActivity(HistoryActivity.class));
-        mBinding.ivCollect.setOnClickListener(view -> jumpActivity(CollectActivity.class));
-        setLoadSir(mBinding.contentLayout);
-
-        initViewModel();
-
-        initData();
-    }
-
-
-    private void initViewModel() {
-        sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
-        sourceViewModel.sortResult.observe(this, absXml -> {
-            showSuccess();
-            if (absXml != null && absXml.classes != null && absXml.classes.sortList != null) {
-                mSortDataList = DefaultConfig.adjustSort(ApiConfig.get().getHomeSourceBean().getKey(), absXml.classes.sortList, true);
+        mBinding!!.nameContainer.setOnClickListener {
+            if (dataInitOk && jarInitOk) {
+                showSiteSwitch()
             } else {
-                mSortDataList = DefaultConfig.adjustSort(ApiConfig.get().getHomeSourceBean().getKey(), new ArrayList<>(), true);
+                ToastUtils.showShort("数据源未加载，长按刷新或切换订阅")
             }
-            initViewPager(absXml);
-        });
+        }
+
+        mBinding!!.nameContainer.setOnLongClickListener { v: View? ->
+            refreshHomeSources()
+            true
+        }
+
+        mBinding!!.search.setOnClickListener { view: View? ->
+            jumpActivity(
+                FastSearchActivity::class.java
+            )
+        }
+        mBinding!!.ivHistory.setOnClickListener { view: View? ->
+            jumpActivity(
+                HistoryActivity::class.java
+            )
+        }
+        mBinding!!.ivCollect.setOnClickListener { view: View? ->
+            jumpActivity(
+                CollectActivity::class.java
+            )
+        }
+        setLoadSir(mBinding!!.contentLayout)
+
+        initViewModel()
+
+        initData()
     }
 
-    private void initData() {
 
-        MainActivity mainActivity = (MainActivity)mActivity;
+    private fun initViewModel() {
+        sourceViewModel = ViewModelProvider(this).get(SourceViewModel::class.java)
+        sourceViewModel.sortResult.observe(this) { absXml: AbsSortXml? ->
+            showSuccess()
+            mSortDataList = if (absXml?.classes != null && absXml.classes.sortList != null) {
+                DefaultConfig.adjustSort(
+                    ApiConfig.get().homeSourceBean.key,
+                    absXml.classes.sortList,
+                    true
+                )
+            } else {
+                DefaultConfig.adjustSort(ApiConfig.get().homeSourceBean.key, ArrayList(), true)
+            }
+            initViewPager(absXml)
+        }
+    }
 
-        SourceBean home = ApiConfig.get().getHomeSourceBean();
-        if (home != null && home.getName() != null && !home.getName().isEmpty()){
-            mBinding.tvName.setText(home.getName());
-            mBinding.tvName.postDelayed(() -> mBinding.tvName.setSelected(true),2000);
+    private fun initData() {
+        val mainActivity = mActivity as MainActivity
+
+        val home = ApiConfig.get().homeSourceBean
+        if (home != null && home.name != null && !home.name.isEmpty()) {
+            mBinding!!.tvName.text = home.name
+            mBinding!!.tvName.postDelayed({ mBinding!!.tvName.isSelected = true }, 2000)
         }
         if (dataInitOk && jarInitOk) {
-            showLoading();
-            sourceViewModel.getSort(ApiConfig.get().getHomeSourceBean().getKey());
-            return;
+            showLoading()
+            sourceViewModel.getSort(ApiConfig.get().homeSourceBean.key)
+            return
         }
-        showLoading();
+        showLoading()
         if (dataInitOk && !jarInitOk) {
-            if (!ApiConfig.get().getSpider().isEmpty()) {
-                ApiConfig.get().loadJar(mainActivity.useCacheConfig, ApiConfig.get().getSpider(), new ApiConfig.LoadConfigCallback() {
-                    @Override
-                    public void success() {
-                        jarInitOk = true;
-                        mHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (!mainActivity.useCacheConfig)
-                                    ToastUtils.showShort("更新订阅成功");
-                                initData();
-                            }
-                        }, 50);
-                    }
-
-                    @Override
-                    public void retry() {
-
-                    }
-
-                    @Override
-                    public void error(String msg) {
-                        jarInitOk = true;
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                ToastUtils.showShort("更新订阅失败");
-                                initData();
-                            }
-                        });
-                    }
-                });
-            }
-            return;
-        }
-        ApiConfig.get().loadConfig(mainActivity.useCacheConfig, new ApiConfig.LoadConfigCallback() {
-            TipDialog dialog = null;
-
-            @Override
-            public void retry() {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        initData();
-                    }
-                });
-            }
-
-            @Override
-            public void success() {
-                dataInitOk = true;
-                if (ApiConfig.get().getSpider().isEmpty()) {
-                    jarInitOk = true;
-                }
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        initData();
-                    }
-                }, 50);
-            }
-
-            @Override
-            public void error(String msg) {
-                if (msg.equalsIgnoreCase("-1")) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            dataInitOk = true;
-                            jarInitOk = true;
-                            initData();
+            if (ApiConfig.get().spider.isNotEmpty()) {
+                ApiConfig.get().loadJar(
+                    mainActivity.useCacheConfig,
+                    ApiConfig.get().spider,
+                    object : LoadConfigCallback {
+                        override fun success() {
+                            jarInitOk = true
+                            mHandler.postDelayed({
+                                if (!mainActivity.useCacheConfig) ToastUtils.showShort("更新订阅成功")
+                                initData()
+                            }, 50)
                         }
-                    });
-                    return;
-                }
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (dialog == null)
-                            dialog = new TipDialog(getActivity(), msg, "重试", "取消", new TipDialog.OnListener() {
-                                @Override
-                                public void left() {
-                                    mHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            initData();
-                                            dialog.hide();
-                                        }
-                                    });
-                                }
 
-                                @Override
-                                public void right() {
-                                    dataInitOk = true;
-                                    jarInitOk = true;
-                                    mHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            initData();
-                                            dialog.hide();
-                                        }
-                                    });
-                                }
+                        override fun retry() {
+                        }
 
-                                @Override
-                                public void cancel() {
-                                    dataInitOk = true;
-                                    jarInitOk = true;
-                                    mHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            initData();
-                                            dialog.hide();
-                                        }
-                                    });
-                                }
-
-                                @Override
-                                public void onTitleClick() {
-                                    dialog.hide();
-                                    jumpActivity(SubscriptionActivity.class);
-                                }
-                            });
-                        if (!dialog.isShowing())
-                            dialog.show();
-                    }
-                });
+                        override fun error(msg: String) {
+                            jarInitOk = true
+                            mHandler.post {
+                                ToastUtils.showShort("更新订阅失败")
+                                initData()
+                            }
+                        }
+                    })
             }
-        }, getActivity());
+            return
+        }
+        ApiConfig.get().loadConfig(mainActivity.useCacheConfig, object : LoadConfigCallback {
+            var dialog: TipDialog? = null
+
+            override fun retry() {
+                mHandler.post { initData() }
+            }
+
+            override fun success() {
+                dataInitOk = true
+                if (ApiConfig.get().spider.isEmpty()) {
+                    jarInitOk = true
+                }
+                mHandler.postDelayed({ initData() }, 50)
+            }
+
+            override fun error(msg: String) {
+                if (msg.equals("-1", ignoreCase = true)) {
+                    mHandler.post {
+                        dataInitOk = true
+                        jarInitOk = true
+                        initData()
+                    }
+                    return
+                }
+                mHandler.post {
+                    if (dialog == null) dialog = TipDialog(
+                        requireActivity(),
+                        msg,
+                        "重试",
+                        "取消",
+                        object : TipDialog.OnListener {
+                            override fun left() {
+                                mHandler.post {
+                                    initData()
+                                    dialog!!.hide()
+                                }
+                            }
+
+                            override fun right() {
+                                dataInitOk = true
+                                jarInitOk = true
+                                mHandler.post {
+                                    initData()
+                                    dialog!!.hide()
+                                }
+                            }
+
+                            override fun cancel() {
+                                dataInitOk = true
+                                jarInitOk = true
+                                mHandler.post {
+                                    initData()
+                                    dialog!!.hide()
+                                }
+                            }
+
+                            override fun onTitleClick() {
+                                dialog!!.hide()
+                                jumpActivity(SubscriptionActivity::class.java)
+                            }
+                        })
+                    if (!dialog!!.isShowing) dialog!!.show()
+                }
+            }
+        }, activity)
     }
 
-    private TextView getTabTextView(String text){
-        TextView textView = new TextView(mContext);
-        textView.setText(text);
-        textView.setGravity(Gravity.CENTER);
-        textView.setPadding(ConvertUtils.dp2px(20), ConvertUtils.dp2px(10), ConvertUtils.dp2px(5), ConvertUtils.dp2px(10));
-        return textView;
-    }
-
-    private void initViewPager(AbsSortXml absXml) {
+    private fun initViewPager(absXml: AbsSortXml?) {
         if (!mSortDataList.isEmpty()) {
-            mBinding.tabLayout.removeAllViews();
-            fragments.clear();
-            for (MovieSort.SortData data : mSortDataList) {
-                mBinding.tabLayout.addView(getTabTextView(data.name));
-
-                if (data.id.equals("my0")) {//tab是主页,添加主页fragment 根据设置项显示豆瓣热门/站点推荐(每个源不一样)/历史记录
-                    if (Hawk.get(HawkConfig.HOME_REC, 0) == 1 && absXml != null && absXml.videoList != null && absXml.videoList.size() > 0) {//站点推荐
-                        fragments.add(UserFragment.newInstance(absXml.videoList));
-                    } else {//豆瓣热门/历史记录
-                        fragments.add(UserFragment.newInstance(null));
+            for (data in mSortDataList) {
+                if (data.id == "my0") {
+                    //tab是主页,添加主页fragment 根据设置项显示豆瓣热门/站点推荐(每个源不一样)/历史记录
+                    if (Hawk.get(
+                            HawkConfig.HOME_REC,
+                            0
+                        ) == 1 && absXml != null && absXml.videoList != null && !absXml.videoList.isEmpty()
+                    ) { //站点推荐
+                        fragments.add(UserFragment.newInstance(absXml.videoList))
+                    } else {
+                        //豆瓣热门/历史记录
+                        fragments.add(UserFragment.newInstance(null))
                     }
-                } else {//来自源的分类
-                    fragments.add(GridFragment.newInstance(data));
+                } else {
+                    //来自源的分类
+                    fragments.add(GridFragment.newInstance(data))
                 }
             }
+            //禁用预加载
+//            mBinding.mViewPager.setOffscreenPageLimit(ViewPager2.OFFSCREEN_PAGE_LIMIT_DEFAULT);
+            mBinding!!.mViewPager.adapter = object : FragmentStateAdapter(this) {
+                override fun createFragment(position: Int): Fragment {
+                    return fragments[position]
+                }
 
-            if (Hawk.get(HawkConfig.HOME_REC, 0) == 2){//关闭主页
-                mBinding.tabLayout.removeViewAt(0);
-                fragments.remove(0);
+                override fun getItemCount(): Int {
+                    return fragments.size
+                }
             }
-
-            //重新渲染vp
-            mBinding.mViewPager.setAdapter(new FragmentStatePagerAdapter(getChildFragmentManager()) {
-                @NonNull
-                @Override
-                public Fragment getItem(int position) {
-                    return fragments.get(position);
-                }
-
-                @Override
-                public int getCount() {
-                    return fragments.size();
-                }
-            });
-            //tab和vp绑定
-            ViewPager1Delegate.Companion.install(mBinding.mViewPager, mBinding.tabLayout,true);
+            val tabLayoutMediator = TabLayoutMediator(
+                mBinding!!.tabLayout,
+                mBinding!!.mViewPager
+            ) { tab: TabLayout.Tab, position: Int ->
+                //这里可以自定义TabView
+                tab.setText(mSortDataList[position].name)
+            }
+            tabLayoutMediator.attach()
         }
     }
 
     /**
      * 提供给主页返回操作
      */
-    public boolean scrollToFirstTab(){
-        if (mBinding.tabLayout.getCurrentItemIndex()!=0){
-            mBinding.mViewPager.setCurrentItem(0, false);
-            return true;
-        }else {
-            return false;
+    fun scrollToFirstTab(): Boolean {
+        if (mBinding!!.tabLayout.selectedTabPosition != 0) {
+            mBinding!!.mViewPager.setCurrentItem(0, false)
+            return true
+        } else {
+            return false
         }
     }
 
-    /**
-     * 提供给主页返回操作
-     */
-    public int getTabIndex(){
-        return mBinding.tabLayout.getCurrentItemIndex();
+    val tabIndex: Int
+        /**
+         * 提供给主页返回操作
+         */
+        get() = mBinding!!.tabLayout.selectedTabPosition
+
+    val allFragments: List<Fragment>
+        /**
+         * 提供给主页返回操作
+         */
+        get() = fragments
+
+
+    override fun onPause() {
+        super.onPause()
+        mHandler.removeCallbacksAndMessages(null)
     }
 
-    /**
-     * 提供给主页返回操作
-     */
-    public List<BaseLazyFragment> getAllFragments(){
-        return fragments;
-    }
+    private fun showSiteSwitch() {
+        val sites = ApiConfig.get().sourceBeanList
+        if (sites.isNotEmpty()) {
+            val dialog = SelectDialog<SourceBean>(requireActivity())
+            val tvRecyclerView = dialog.findViewById<TvRecyclerView>(R.id.list)
 
+            tvRecyclerView.layoutManager = V7GridLayoutManager(dialog.context, 2)
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        mHandler.removeCallbacksAndMessages(null);
-    }
-
-    void showSiteSwitch() {
-        List<SourceBean> sites = ApiConfig.get().getSourceBeanList();
-        if (sites.size() > 0) {
-            SelectDialog<SourceBean> dialog = new SelectDialog<>(getActivity());
-            TvRecyclerView tvRecyclerView = dialog.findViewById(R.id.list);
-
-            tvRecyclerView.setLayoutManager(new V7GridLayoutManager(dialog.getContext(), 2));
-
-            dialog.setTip("请选择首页数据源");
-            dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<SourceBean>() {
-                @Override
-                public void click(SourceBean value, int pos) {
-                    ApiConfig.get().setSourceBean(value);
-                    refreshHomeSouces();
+            dialog.setTip("请选择首页数据源")
+            dialog.setAdapter(object : SelectDialogInterface<SourceBean> {
+                override fun click(value: SourceBean, pos: Int) {
+                    ApiConfig.get().setSourceBean(value)
+                    refreshHomeSources()
                 }
 
-                @Override
-                public String getDisplay(SourceBean val) {
-                    return val.getName();
+                override fun getDisplay(value: SourceBean): String {
+                    return value.name
                 }
-            }, new DiffUtil.ItemCallback<SourceBean>() {
-                @Override
-                public boolean areItemsTheSame(@NonNull @NotNull SourceBean oldItem, @NonNull @NotNull SourceBean newItem) {
-                    return oldItem == newItem;
+            }, object : DiffUtil.ItemCallback<SourceBean>() {
+                override fun areItemsTheSame(oldItem: SourceBean, newItem: SourceBean): Boolean {
+                    return oldItem === newItem
                 }
 
-                @Override
-                public boolean areContentsTheSame(@NonNull @NotNull SourceBean oldItem, @NonNull @NotNull SourceBean newItem) {
-                    return oldItem.getKey().equals(newItem.getKey());
+                @SuppressLint("DiffUtilEquals")
+                override fun areContentsTheSame(oldItem: SourceBean, newItem: SourceBean): Boolean {
+                    return oldItem.key == newItem.key
                 }
-            }, sites, sites.indexOf(ApiConfig.get().getHomeSourceBean()));
-            dialog.show();
-        }else {
-            ToastUtils.showLong("暂无可用数据源");
+            }, sites, sites.indexOf(ApiConfig.get().homeSourceBean))
+            dialog.show()
+        } else {
+            ToastUtils.showLong("暂无可用数据源")
         }
     }
 
-    private void refreshHomeSouces(){
-        Intent intent = new Intent(App.getInstance(), MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        Bundle bundle = new Bundle();
-        bundle.putBoolean("useCache", true);
-        intent.putExtras(bundle);
-        startActivity(intent);
+    private fun refreshHomeSources() {
+        val intent = Intent(App.getInstance(), MainActivity::class.java)
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        val bundle = Bundle()
+        bundle.putBoolean("useCache", true)
+        intent.putExtras(bundle)
+        startActivity(intent)
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        ControlManager.get().stopServer();
+    override fun onDestroy() {
+        super.onDestroy()
+        ControlManager.get().stopServer()
     }
 }

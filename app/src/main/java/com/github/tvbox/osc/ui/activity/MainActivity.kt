@@ -3,19 +3,19 @@ package com.github.tvbox.osc.ui.activity
 import android.os.Process
 import android.view.MenuItem
 import androidx.fragment.app.Fragment
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.ToastUtils
 import com.github.tvbox.osc.base.BaseVbActivity
 import com.github.tvbox.osc.databinding.ActivityMainBinding
-import com.github.tvbox.osc.ui.adapter.ViewPager2Adapter
 import com.github.tvbox.osc.ui.fragment.GridFragment
 import com.github.tvbox.osc.ui.fragment.HomeFragment
 import com.github.tvbox.osc.ui.fragment.MyFragment
 import kotlin.system.exitProcess
 
 class MainActivity : BaseVbActivity<ActivityMainBinding>() {
-    private var fragments: MutableList<Fragment> = ArrayList()
+    private var fragments = ArrayList<Fragment>()
 
     @JvmField
     var useCacheConfig: Boolean = false
@@ -45,7 +45,11 @@ class MainActivity : BaseVbActivity<ActivityMainBinding>() {
     private fun initVp() {
         fragments.add(HomeFragment())
         fragments.add(MyFragment())
-        mBinding.vp.adapter = ViewPager2Adapter(this)
+        mBinding.vp.adapter = object : FragmentStateAdapter(this) {
+            override fun getItemCount(): Int = fragments.size
+
+            override fun createFragment(position: Int): Fragment = fragments[position]
+        }
         mBinding.vp.offscreenPageLimit = fragments.size
     }
 

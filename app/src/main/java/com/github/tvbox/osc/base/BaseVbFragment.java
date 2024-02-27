@@ -47,7 +47,7 @@ public abstract class BaseVbFragment<T extends ViewBinding> extends Fragment imp
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        AutoSize.autoConvertDensity(getActivity(), getSizeInDp(), isBaseOnWidth());
+        AutoSize.autoConvertDensity(requireActivity(), getSizeInDp(), isBaseOnWidth());
         return initBindingViewRoot(container);
     }
 

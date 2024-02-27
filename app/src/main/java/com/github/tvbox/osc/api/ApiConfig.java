@@ -294,9 +294,9 @@ public class ApiConfig {
         System.out.println("从本地缓存加载" + f.getAbsolutePath());
         BufferedReader bReader = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
         StringBuilder sb = new StringBuilder();
-        String s = "";
+        String s;
         while ((s = bReader.readLine()) != null) {
-            sb.append(s + "\n");
+            sb.append(s).append("\n");
         }
         bReader.close();
         parseJson(apiUrl, sb.toString());
