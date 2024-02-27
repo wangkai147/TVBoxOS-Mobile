@@ -42,7 +42,7 @@ public class SearchHelper {
             mCheckSourcesForApi.put(api, mCheckSources);
         }
         SearchActivity.setCheckedSourcesForSearch(mCheckSources);
-        FastSearchActivity.setCheckedSourcesForSearch(mCheckSources);
+        FastSearchActivity.Companion.setCheckedSourcesForSearch(mCheckSources);
         Hawk.put(HawkConfig.SOURCES_FOR_SEARCH, mCheckSourcesForApi);
     }
 
