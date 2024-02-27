@@ -69,9 +69,9 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
     private var isFilterMode = false
     private var searchFilterKey: String = "" // 过滤的key
     private val resultVideos = HashMap<String, ArrayList<Movie.Video>>() // 搜索结果
+    private var searchExecutorService: ExecutorService = Executors.newFixedThreadPool(10)
+    private val allRunCount = AtomicInteger(0)
     private var pauseRunnable: MutableList<Runnable>? = null
-    private var mSearchSuggestionsDialog: SearchSuggestionsDialog? = null
-    private var mSearchCheckboxDialog: SearchCheckboxDialog? = null
 
     override fun init() {
         initView()
@@ -188,22 +188,18 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
     }
 
     /**
-     * 指定搜索源(过滤)
+     * 指定搜索源(过滤) 可以避免重复创建对话框
      */
+    private var mSearchCheckboxDialog: SearchCheckboxDialog? = null
     private fun filterSearchSource() {
         if (mSearchCheckboxDialog == null) {
             val allSourceBean = ApiConfig.get().sourceBeanList
-            val searchAbleSource: MutableList<SourceBean> = ArrayList()
-            for (sourceBean in allSourceBean) {
-                if (sourceBean.isSearchable) {
-                    searchAbleSource.add(sourceBean)
-                }
-            }
+            val searchAbleSource = allSourceBean.filter { it.isSearchable }.toMutableList()
             mSearchCheckboxDialog =
                 SearchCheckboxDialog(this@FastSearchActivity, searchAbleSource, mCheckSources)
         }
-        mSearchCheckboxDialog!!.setOnDismissListener { dialog: DialogInterface -> dialog.dismiss() }
-        mSearchCheckboxDialog!!.show()
+        mSearchCheckboxDialog?.setOnDismissListener { dialog: DialogInterface -> dialog.dismiss() }
+        mSearchCheckboxDialog?.show()
     }
 
     private fun filterResult(spName: String) {
@@ -214,9 +210,8 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
         }
         mBinding.mGridView.visibility = View.GONE
         mBinding.mGridViewFilter.visibility = View.VISIBLE
-        val key = spNames[spName]
-        if (key!!.isEmpty()) return
-
+        val key = spNames[spName] ?: ""
+        if (key.isEmpty()) return
         if (searchFilterKey === key) return
         searchFilterKey = key
 
@@ -354,31 +349,33 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
 
                 @Throws(Throwable::class)
                 override fun convertResponse(response: Response): String {
-                    return response.body()!!.string()
+                    return response.body()?.string() ?: ""
                 }
             })
     }
 
+    private var mSearchSuggestionsDialog: SearchSuggestionsDialog? = null
     private fun showSuggestDialog(list: List<String>) {
         if (mSearchSuggestionsDialog == null) {
             mSearchSuggestionsDialog = SearchSuggestionsDialog(
                 this@FastSearchActivity, list
             ) { _: Int, text: String ->
-                LogUtils.d("搜索:$text")
-                mSearchSuggestionsDialog!!.dismissWith { search(text) }
+                mSearchSuggestionsDialog?.dismissWith { search(text) }
             }
 
             XPopup.Builder(this@FastSearchActivity).atView(mBinding.etSearch)
                 .notDismissWhenTouchInView(mBinding.etSearch).isViewMode(true) //开启View实现
                 .isRequestFocus(false) //不强制焦点
                 .setPopupCallback(object : SimpleCallback() {
-                    override fun onDismiss(popupView: BasePopupView) { // 弹窗关闭了就置空对象,下次重新new
+                    override fun onDismiss(popupView: BasePopupView) {
+                        // 弹窗关闭了就置空对象,下次重新new
                         super.onDismiss(popupView)
                         mSearchSuggestionsDialog = null
                     }
                 }).asCustom(mSearchSuggestionsDialog).show()
-        } else { // 不为空说明弹窗为打开状态(关闭就置空了).直接刷新数据
-            mSearchSuggestionsDialog!!.updateSuggestions(list)
+        } else {
+            // 不为空说明弹窗为打开状态(关闭就置空了).直接刷新数据
+            mSearchSuggestionsDialog?.updateSuggestions(list)
         }
     }
 
@@ -434,8 +431,8 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
         mBinding.etSearch.setSelection(title.length)
         mBinding.etSearch.addTextChangedListener(this)
 
-        if (mSearchSuggestionsDialog != null && mSearchSuggestionsDialog!!.isShow) {
-            mSearchSuggestionsDialog!!.dismiss()
+        if (mSearchSuggestionsDialog?.isShow == false) {
+            mSearchSuggestionsDialog?.dismiss()
         }
 
         if (!Hawk.get(HawkConfig.PRIVATE_BROWSING, false)) {
@@ -459,9 +456,6 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
         mBinding.tabLayout.removeAllTabs()
         searchResult()
     }
-
-    private var searchExecutorService: ExecutorService = Executors.newFixedThreadPool(10)
-    private val allRunCount = AtomicInteger(0)
 
     private fun searchResult() {
         try {
@@ -605,8 +599,8 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
 
     override fun afterTextChanged(editable: Editable) {
         val text = editable.toString()
-        if (TextUtils.isEmpty(text) && mSearchSuggestionsDialog != null) {
-            mSearchSuggestionsDialog!!.dismiss()
+        if (TextUtils.isEmpty(text)) {
+            mSearchSuggestionsDialog?.dismiss()
         } else {
             getSuggest(text)
         }
