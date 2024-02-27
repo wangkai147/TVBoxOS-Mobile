@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
-import android.util.Log
-import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -464,14 +462,6 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
 
     private var searchExecutorService: ExecutorService = Executors.newFixedThreadPool(10)
     private val allRunCount = AtomicInteger(0)
-
-    private fun getSiteTextView(text: String): TextView {
-        val textView = TextView(this)
-        textView.text = text
-        textView.gravity = Gravity.CENTER
-        textView.setPadding(20, 10, 20, 10)
-        return textView
-    }
 
     private fun searchResult() {
         try {
