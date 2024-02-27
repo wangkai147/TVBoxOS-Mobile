@@ -157,10 +157,9 @@ dependencies {
     //glide图片加载
     implementation 'com.github.bumptech.glide:glide:4.12.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
-
     //tab标题栏
-    implementation project(":TabLayout")
-    implementation project(':ViewPager1Delegate')
+    implementation 'com.github.angcyo.DslTablayout:TabLayout:3.5.5'
+    implementation 'com.github.angcyo.DslTablayout:ViewPager2Delegate:3.5.5'
     //TabLayout的非kt项目需要依赖这个包实现点击事件等
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     //展开收缩tv
@@ -174,4 +173,5 @@ dependencies {
     //dlna投屏
     implementation 'com.github.devin1014.DLNA-Cast:dlna-dmc:V1.0.0'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
+    implementation 'q.rorbin:VerticalTabLayout:1.2.5'
 }
