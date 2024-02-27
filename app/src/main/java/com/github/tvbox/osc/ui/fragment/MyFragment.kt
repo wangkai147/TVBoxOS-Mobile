@@ -2,7 +2,6 @@ package com.github.tvbox.osc.ui.fragment
 
 import android.content.Intent
 import android.net.Uri
-import android.text.TextUtils
 import com.blankj.utilcode.util.AppUtils
 import com.blankj.utilcode.util.ClipboardUtils
 import com.blankj.utilcode.util.ToastUtils
