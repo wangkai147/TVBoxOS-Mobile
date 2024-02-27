@@ -53,7 +53,7 @@ class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
     override fun init() {
         ControlManager.get().startServer()
 
-        mBinding!!.nameContainer.setOnClickListener {
+        mBinding.nameContainer.setOnClickListener {
             if (dataInitOk && jarInitOk) {
                 showSiteSwitch()
             } else {
@@ -61,27 +61,27 @@ class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
             }
         }
 
-        mBinding!!.nameContainer.setOnLongClickListener {
+        mBinding.nameContainer.setOnLongClickListener {
             refreshHomeSources()
             true
         }
 
-        mBinding!!.search.setOnClickListener {
+        mBinding.search.setOnClickListener {
             jumpActivity(
                 FastSearchActivity::class.java
             )
         }
-        mBinding!!.ivHistory.setOnClickListener {
+        mBinding.ivHistory.setOnClickListener {
             jumpActivity(
                 HistoryActivity::class.java
             )
         }
-        mBinding!!.ivCollect.setOnClickListener {
+        mBinding.ivCollect.setOnClickListener {
             jumpActivity(
                 CollectActivity::class.java
             )
         }
-        setLoadSir(mBinding!!.contentLayout)
+        setLoadSir(mBinding.contentLayout)
 
         initViewModel()
 
@@ -111,8 +111,8 @@ class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
 
         val home = ApiConfig.get().homeSourceBean
         if (home != null && home.name != null && home.name.isNotEmpty()) {
-            mBinding!!.tvName.text = home.name
-            mBinding!!.tvName.postDelayed({ mBinding!!.tvName.isSelected = true }, 2000)
+            mBinding.tvName.text = home.name
+            mBinding.tvName.postDelayed({ mBinding.tvName.isSelected = true }, 2000)
         }
         if (dataInitOk && jarInitOk) {
             showLoading()
@@ -237,7 +237,7 @@ class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
             }
             //禁用预加载
 //            mBinding.mViewPager.setOffscreenPageLimit(ViewPager2.OFFSCREEN_PAGE_LIMIT_DEFAULT);
-            mBinding!!.mViewPager.adapter = object : FragmentStateAdapter(this) {
+            mBinding.mViewPager.adapter = object : FragmentStateAdapter(this) {
                 override fun createFragment(position: Int): Fragment {
                     return fragments[position]
                 }
@@ -247,8 +247,8 @@ class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
                 }
             }
             val tabLayoutMediator = TabLayoutMediator(
-                mBinding!!.tabLayout,
-                mBinding!!.mViewPager
+                mBinding.tabLayout,
+                mBinding.mViewPager
             ) { tab: TabLayout.Tab, position: Int ->
                 //这里可以自定义TabView
                 tab.setText(mSortDataList[position].name)
@@ -261,8 +261,8 @@ class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
      * 提供给主页返回操作
      */
     fun scrollToFirstTab(): Boolean {
-        if (mBinding!!.tabLayout.selectedTabPosition != 0) {
-            mBinding!!.mViewPager.setCurrentItem(0, false)
+        if (mBinding.tabLayout.selectedTabPosition != 0) {
+            mBinding.mViewPager.setCurrentItem(0, false)
             return true
         } else {
             return false
@@ -273,7 +273,7 @@ class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
         /**
          * 提供给主页返回操作
          */
-        get() = mBinding!!.tabLayout.selectedTabPosition
+        get() = mBinding.tabLayout.selectedTabPosition
 
     val allFragments: List<Fragment>
         /**
