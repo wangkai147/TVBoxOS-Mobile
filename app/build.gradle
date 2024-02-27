@@ -24,6 +24,11 @@ android {
         }
 
     }
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/DEPENDENCIES', 'META-INF/beans.xml']
+        }
+    }
 
 
     // 执行配置
@@ -39,10 +44,6 @@ android {
         }
     }
 
-
-    packagingOptions {
-        exclude 'META-INF/DEPENDENCIES'
-    }
 
     signingConfigs {
         config {
@@ -87,10 +88,8 @@ android {
     buildFeatures {
         viewBinding true
     }
+    namespace 'com.github.tvbox.osc'
 
-    packagingOptions {//引入dlna-cast时的文件冲突
-        exclude 'META-INF/beans.xml'
-    }
 }
 
 dependencies {
