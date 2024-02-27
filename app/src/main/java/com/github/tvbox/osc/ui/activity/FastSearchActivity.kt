@@ -73,7 +73,6 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
     private var pauseRunnable: MutableList<Runnable>? = null
     private var mSearchSuggestionsDialog: SearchSuggestionsDialog? = null
     private var mSearchCheckboxDialog: SearchCheckboxDialog? = null
-    private var mSearchWordAdapter: SearchWordAdapter? = null
 
     override fun init() {
         initView()
@@ -175,16 +174,6 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
                 }
                 true
             }
-
-        mSearchWordAdapter = SearchWordAdapter()
-        mBinding.rvFenci.addItemDecoration(LinearSpacingItemDecoration(20, true))
-        mBinding.rvFenci.adapter = mSearchWordAdapter
-        mSearchWordAdapter!!.setOnItemClickListener { _: BaseQuickAdapter<*, *>, _: View, position: Int ->
-            search(
-                mSearchWordAdapter!!.data[position]
-            )
-        }
-
         setLoadSir(mBinding.llLayout)
     }
 
