@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
+import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -30,15 +31,14 @@ import com.github.tvbox.osc.databinding.ActivityFastSearchBinding
 import com.github.tvbox.osc.event.RefreshEvent
 import com.github.tvbox.osc.event.ServerEvent
 import com.github.tvbox.osc.ui.adapter.FastSearchAdapter
-import com.github.tvbox.osc.ui.adapter.SearchWordAdapter
 import com.github.tvbox.osc.ui.dialog.SearchCheckboxDialog
 import com.github.tvbox.osc.ui.dialog.SearchSuggestionsDialog
 import com.github.tvbox.osc.ui.dialog.TmdbVodInfoDialog
-import com.github.tvbox.osc.ui.widget.LinearSpacingItemDecoration
 import com.github.tvbox.osc.util.FastClickCheckUtil
 import com.github.tvbox.osc.util.HawkConfig
 import com.github.tvbox.osc.util.SearchHelper
 import com.github.tvbox.osc.viewmodel.SourceViewModel
+import com.google.android.material.tabs.TabLayout
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.lxj.xpopup.XPopup
@@ -52,6 +52,7 @@ import com.zhy.view.flowlayout.TagAdapter
 import okhttp3.Response
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import java.util.Objects
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
@@ -110,12 +111,19 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
         mBinding.ivFilter.setOnClickListener { filterSearchSource() }
         mBinding.ivBack.setOnClickListener { finish() }
         mBinding.ivSearch.setOnClickListener { search(mBinding.etSearch.text.toString()) }
-        mBinding.tabLayout.configTabLayoutConfig {
-            onSelectViewChange = { _: View?, views: List<View>, _: Boolean, _: Boolean ->
-                val tvItem = views[0] as TextView
-                filterResult(tvItem.text.toString())
+
+        mBinding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                filterResult(tab.text.toString())
             }
-        }
+
+            override fun onTabUnselected(p0: TabLayout.Tab) {
+            }
+
+            override fun onTabReselected(p0: TabLayout.Tab) {
+            }
+
+        })
 
 
         mBinding.mGridView.setHasFixedSize(true)
@@ -316,7 +324,7 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
 
                     @Throws(Throwable::class)
                     override fun convertResponse(response: Response): String {
-                        return response.body()!!.string()
+                        return response.body()?.string() ?: ""
                     }
                 })
         }
@@ -450,8 +458,7 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
         searchFilterKey = ""
         isFilterMode = false
         spNames.clear()
-        mBinding.tabLayout.removeAllViews()
-
+        mBinding.tabLayout.removeAllTabs()
         searchResult()
     }
 
@@ -481,11 +488,12 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
         val home = ApiConfig.get().homeSourceBean
         searchRequestList.remove(home)
         searchRequestList.add(0, home)
-
-
+        mBinding.tabLayout.removeAllTabs()
         val siteKey = ArrayList<String>()
-        mBinding.tabLayout.addView(getSiteTextView("全部显示"))
-        mBinding.tabLayout.setCurrentItem(0, notify = true, fromUser = false)
+        val tab = mBinding.tabLayout.newTab()
+        tab.text = "全部显示"
+        mBinding.tabLayout.addTab(tab)
+//        mBinding.tabLayout.setCurrentItem(0, notify = true, fromUser = false)
         for (bean in searchRequestList) {
             if (!bean.isSearchable) {
                 continue
@@ -523,17 +531,15 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
                 }
             }
             if (name == "") return key
-
             for (i in 0 until mBinding.tabLayout.childCount) {
-                val item = mBinding.tabLayout.getChildAt(i) as TextView
-                if (name == item.text.toString()) {
+                val item = mBinding.tabLayout.getTabAt(i)
+                if (Objects.equals(name, item?.text.toString())) {
                     return key
                 }
             }
-
-            mBinding.tabLayout.addView(getSiteTextView(name))
+            mBinding.tabLayout.addTab(mBinding.tabLayout.newTab().setText(name))
             return key
-        } catch (e: Exception) {
+        } catch (e: java.lang.Exception) {
             return key
         }
     }
@@ -562,7 +568,8 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
                     resultVideos[video.sourceKey] = ArrayList()
                 }
                 resultVideos[video.sourceKey]?.add(video)
-                if (video.sourceKey !== lastSourceKey) { // 添加到最后面并记录最后一个key用于下次判断
+                if (video.sourceKey !== lastSourceKey) {
+                    // 添加到最后面并记录最后一个key用于下次判断
                     lastSourceKey = this.addWordAdapterIfNeed(video.sourceKey)
                 }
             }

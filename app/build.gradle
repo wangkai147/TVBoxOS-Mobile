@@ -173,5 +173,4 @@ dependencies {
     //dlna投屏
     implementation 'com.github.devin1014.DLNA-Cast:dlna-dmc:V1.0.0'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
-    implementation 'q.rorbin:VerticalTabLayout:1.2.5'
 }
