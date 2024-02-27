@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DiffUtil
@@ -62,22 +61,22 @@ class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
             }
         }
 
-        mBinding!!.nameContainer.setOnLongClickListener { v: View? ->
+        mBinding!!.nameContainer.setOnLongClickListener {
             refreshHomeSources()
             true
         }
 
-        mBinding!!.search.setOnClickListener { view: View? ->
+        mBinding!!.search.setOnClickListener {
             jumpActivity(
                 FastSearchActivity::class.java
             )
         }
-        mBinding!!.ivHistory.setOnClickListener { view: View? ->
+        mBinding!!.ivHistory.setOnClickListener {
             jumpActivity(
                 HistoryActivity::class.java
             )
         }
-        mBinding!!.ivCollect.setOnClickListener { view: View? ->
+        mBinding!!.ivCollect.setOnClickListener {
             jumpActivity(
                 CollectActivity::class.java
             )
@@ -111,7 +110,7 @@ class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
         val mainActivity = mActivity as MainActivity
 
         val home = ApiConfig.get().homeSourceBean
-        if (home != null && home.name != null && !home.name.isEmpty()) {
+        if (home != null && home.name != null && home.name.isNotEmpty()) {
             mBinding!!.tvName.text = home.name
             mBinding!!.tvName.postDelayed({ mBinding!!.tvName.isSelected = true }, 2000)
         }
@@ -217,14 +216,14 @@ class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
     }
 
     private fun initViewPager(absXml: AbsSortXml?) {
-        if (!mSortDataList.isEmpty()) {
+        if (mSortDataList.isNotEmpty()) {
             for (data in mSortDataList) {
                 if (data.id == "my0") {
                     //tab是主页,添加主页fragment 根据设置项显示豆瓣热门/站点推荐(每个源不一样)/历史记录
                     if (Hawk.get(
                             HawkConfig.HOME_REC,
                             0
-                        ) == 1 && absXml != null && absXml.videoList != null && !absXml.videoList.isEmpty()
+                        ) == 1 && absXml != null && absXml.videoList != null && absXml.videoList.isNotEmpty()
                     ) { //站点推荐
                         fragments.add(UserFragment.newInstance(absXml.videoList))
                     } else {
