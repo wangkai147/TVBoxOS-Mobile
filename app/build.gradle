@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
-    compileSdkVersion 33
+    compileSdk 34
 
     defaultConfig {
         applicationId 'com.github.tvbox.osc'
-        minSdkVersion 24
-        targetSdkVersion 30
+        minSdk 24
+        targetSdk 34
         versionCode 30
         versionName '1.1.0'
         multiDexEnabled true
