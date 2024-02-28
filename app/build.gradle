@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId 'com.github.tvbox.osc'
-        minSdk 24
+        minSdk 23
         targetSdk 34
         versionCode 30
         versionName '1.1.0'
@@ -95,77 +95,75 @@ android {
 dependencies {
     api fileTree(dir: "libs", include: ['*.jar', '*.aar'])
 
-    implementation 'com.google.android.material:material:1.11.0'
+    implementation libs.material
+    implementation libs.core.ktx
+    implementation libs.kotlin.stdlib
+    implementation libs.kotlin.stdlib.jdk8
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.21"
-    implementation 'androidx.core:core-ktx:1.6.0'
-
-    implementation 'org.nanohttpd:nanohttpd:2.3.1'
-    implementation 'com.google.zxing:core:3.4.1'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    implementation files('libs/thunder.jar')
-    implementation files('libs/commons-lang3-3.12.0.jar')
-    implementation 'org.conscrypt:conscrypt-android:2.5.2'
+    implementation libs.nanohttpd
+    implementation libs.core
+    implementation libs.appcompat
+    implementation libs.constraintlayout
+    implementation libs.lifecycle.extensions
+    implementation libs.recyclerview
+    implementation libs.conscrypt.android
 
     implementation 'com.squareup.okhttp3:okhttp:3.12.11'
-    annotationProcessor 'androidx.room:room-compiler:2.3.0'
-    implementation 'androidx.room:room-runtime:2.3.0'
-    implementation 'androidx.multidex:multidex:2.0.1'
-    implementation 'com.squareup.okio:okio:2.9.0'
-    implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.45-androidx'
-    implementation 'com.kingja.loadsir:loadsir:1.3.8'
-    implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation 'me.jessyan:autosize:1.2.1'
-    implementation('com.thoughtworks.xstream:xstream:1.4.15') {
+    annotationProcessor libs.room.compiler
+    implementation libs.room.runtime
+    implementation libs.multidex
+    implementation libs.okio
+    implementation libs.recycler.help
+    implementation libs.loadsir
+    implementation libs.gson
+    implementation libs.picasso
+    implementation libs.autosize
+    implementation(libs.xstream) {
         exclude group: 'xmlpull', module: 'xmlpull'
     }
-    implementation 'org.greenrobot:eventbus:3.2.0'
-    implementation 'com.orhanobut:hawk:2.0.1'
+    implementation libs.eventbus
+    implementation libs.hawk
+    implementation libs.android.retrofuture
 
-    implementation project(":player")
-    implementation project(":quickjs")
-    implementation 'net.sourceforge.streamsupport:android-retrofuture:1.7.4'
-
-    implementation('org.xwalk:xwalk_shared_library:23.53.589.4') {
+    implementation(libs.xwalk.shared.library) {
         exclude group: 'com.android.support'
     }
-    implementation 'com.lzy.net:okgo:3.0.4'
-    implementation 'com.owen:tv-recyclerview:3.0.0'
+    implementation libs.okgo
+    implementation libs.tv.recyclerview
 
-    implementation 'com.github.getActivity:XXPermissions:13.6'
-    implementation 'org.jsoup:jsoup:1.14.1'
-    implementation 'com.github.hedzr:android-file-chooser:v1.2.0-final'
-    implementation 'commons-io:commons-io:2.11.0'
-    implementation 'com.googlecode.juniversalchardet:juniversalchardet:1.0.3'
+    implementation libs.xxpermissions
+    implementation libs.jsoup
+    implementation libs.android.file.chooser
+    implementation libs.commons.io
+    implementation libs.juniversalchardet
 
     //沉浸式状态栏
-    implementation 'com.geyifeng.immersionbar:immersionbar:3.2.2'
+    implementation libs.immersionbar
     //标题栏
-    implementation 'com.github.getActivity:TitleBar:10.5'
+    implementation libs.titlebar
     //弹窗
-    implementation 'com.github.li-xiaojun:XPopup:2.9.19'
+    implementation libs.xpopup
     //工具类
-    implementation 'com.blankj:utilcodex:1.31.0'
+    implementation libs.utilcodex
     //阴影/shape/选择器/圆角/...
-    implementation 'com.github.lihangleo2:ShadowLayout:3.3.3'
+    implementation libs.shadowLayout
     //glide图片加载
-    implementation 'com.github.bumptech.glide:glide:4.14.2'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
-    //TabLayout的非kt项目需要依赖这个包实现点击事件等
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation libs.glide
+    annotationProcessor libs.compiler
     //展开收缩tv
-    implementation 'com.github.MZCretin:ExpandableTextView:v1.6.1-x'
+    implementation libs.expandableTextView
     //lottie动画
-    implementation 'com.airbnb.android:lottie:6.0.0'
+    implementation libs.lottie
     //流式布局
-    implementation 'com.hyman:flowlayout-lib:1.1.2'
+    implementation libs.flowlayout.lib
     //崩溃
     implementation project(":crash")
     //dlna投屏
-    implementation 'com.github.devin1014.DLNA-Cast:dlna-dmc:V1.0.0'
-    implementation 'androidx.viewpager2:viewpager2:1.0.0'
+    implementation libs.dlna.dmc
+    implementation libs.viewpager2
+
+    implementation files('libs/thunder.jar')
+    implementation files('libs/commons-lang3-3.12.0.jar')
+    implementation project(":player")
+    implementation project(":quickjs")
 }

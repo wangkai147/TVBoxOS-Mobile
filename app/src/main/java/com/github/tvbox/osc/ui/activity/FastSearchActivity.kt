@@ -69,9 +69,9 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
     private var isFilterMode = false
     private var searchFilterKey: String = "" // 过滤的key
     private val resultVideos = HashMap<String, ArrayList<Movie.Video>>() // 搜索结果
-    private var searchExecutorService: ExecutorService = Executors.newFixedThreadPool(10)
     private val allRunCount = AtomicInteger(0)
     private var pauseRunnable: MutableList<Runnable>? = null
+    private var searchExecutorService: ExecutorService = Executors.newFixedThreadPool(10)
 
     override fun init() {
         initView()
@@ -86,12 +86,15 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
 
     override fun onResume() {
         super.onResume()
-        if (pauseRunnable != null && pauseRunnable!!.isNotEmpty()) {
+        if (pauseRunnable?.isNotEmpty() == true) {
             allRunCount.set(pauseRunnable!!.size)
             for (runnable in pauseRunnable!!) {
+                if (searchExecutorService.isShutdown) {
+                    searchExecutorService = Executors.newFixedThreadPool(10)
+                }
                 searchExecutorService.execute(runnable)
             }
-            pauseRunnable!!.clear()
+            pauseRunnable?.clear()
             pauseRunnable = null
         }
     }
@@ -184,7 +187,7 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
     }
 
     private fun initViewModel() {
-        sourceViewModel = ViewModelProvider(this).get(SourceViewModel::class.java)
+        sourceViewModel = ViewModelProvider(this)[SourceViewModel::class.java]
     }
 
     /**

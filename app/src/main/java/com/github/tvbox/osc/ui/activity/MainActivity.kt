@@ -55,7 +55,9 @@ class MainActivity : BaseVbActivity<ActivityMainBinding>() {
 
     private var exitTime = 0L
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        super.onBackPressed()
         if (mBinding.vp.currentItem == 1) {
             mBinding.vp.currentItem = 0
             return
