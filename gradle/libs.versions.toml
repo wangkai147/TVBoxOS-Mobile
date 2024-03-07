@@ -7,7 +7,6 @@ autosize = "1.2.1"
 commonsIo = "2.13.0"
 compiler = "4.12.0"
 dkplayerUi = "3.3.5"
-dlnaDmc = "V1.0.0"
 eventbus = "3.2.0"
 exoplayerVersion = "2.19.1"
 expandabletextview = "v1.6.1-x"
@@ -55,7 +54,6 @@ autosize = { module = "me.jessyan:autosize", version.ref = "autosize" }
 commons-io = { module = "commons-io:commons-io", version.ref = "commonsIo" }
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "compiler" }
 dkplayer-ui = { module = "xyz.doikki.android.dkplayer:dkplayer-ui", version.ref = "dkplayerUi" }
-dlna-dmc = { module = "com.github.devin1014.DLNA-Cast:dlna-dmc", version.ref = "dlnaDmc" }
 eventbus = { module = "org.greenrobot:eventbus", version.ref = "eventbus" }
 exoplayer-core = { module = "com.google.android.exoplayer:exoplayer-core", version.ref = "exoplayerVersion" }
 exoplayer-dash = { module = "com.google.android.exoplayer:exoplayer-dash", version.ref = "exoplayerVersion" }

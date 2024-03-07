@@ -159,7 +159,8 @@ dependencies {
     //崩溃
     implementation project(":crash")
     //dlna投屏
-    implementation libs.dlna.dmc
+    implementation 'com.github.devin1014.DLNA-Cast:dlna-dmc:V1.0.0'
+
     implementation libs.viewpager2
 
     implementation files('libs/thunder.jar')
