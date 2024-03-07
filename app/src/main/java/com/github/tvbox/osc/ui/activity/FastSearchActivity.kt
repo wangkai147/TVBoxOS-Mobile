@@ -168,21 +168,21 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
         }
 
         searchAdapter.onItemLongClickListener =
-            BaseQuickAdapter.OnItemLongClickListener { _: BaseQuickAdapter<*, *>, _: View, position: Int ->
-                val video = searchAdapter.data[position]
-                if (!TextUtils.isEmpty(video.name)) {
-                    queryFromTMDB(video.name)
+                BaseQuickAdapter.OnItemLongClickListener { _: BaseQuickAdapter<*, *>, _: View, position: Int ->
+                    val video = searchAdapter.data[position]
+                    if (!TextUtils.isEmpty(video.name)) {
+                        queryFromTMDB(video.name)
+                    }
+                    true
                 }
-                true
-            }
         searchAdapterFilter.onItemLongClickListener =
-            BaseQuickAdapter.OnItemLongClickListener { _: BaseQuickAdapter<*, *>?, _: View, position: Int ->
-                val video = searchAdapterFilter.data[position]
-                if (!TextUtils.isEmpty(video.name)) {
-                    queryFromTMDB(video.name)
+                BaseQuickAdapter.OnItemLongClickListener { _: BaseQuickAdapter<*, *>?, _: View, position: Int ->
+                    val video = searchAdapterFilter.data[position]
+                    if (!TextUtils.isEmpty(video.name)) {
+                        queryFromTMDB(video.name)
+                    }
+                    true
                 }
-                true
-            }
         setLoadSir(mBinding.llLayout)
     }
 
@@ -199,7 +199,7 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
             val allSourceBean = ApiConfig.get().sourceBeanList
             val searchAbleSource = allSourceBean.filter { it.isSearchable }.toMutableList()
             mSearchCheckboxDialog =
-                SearchCheckboxDialog(this@FastSearchActivity, searchAbleSource, mCheckSources)
+                    SearchCheckboxDialog(this@FastSearchActivity, searchAbleSource, mCheckSources)
         }
         mSearchCheckboxDialog?.setOnDismissListener { dialog: DialogInterface -> dialog.dismiss() }
         mSearchCheckboxDialog?.show()
@@ -253,7 +253,7 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
         mBinding.flHistory.adapter = object : TagAdapter<String?>(mSearchHistory) {
             override fun getView(parent: FlowLayout, position: Int, s: String?): View {
                 val tv = LayoutInflater.from(this@FastSearchActivity).inflate(
-                    R.layout.item_search_word_hot, mBinding.flHistory, false
+                        R.layout.item_search_word_hot, mBinding.flHistory, false
                 ) as TextView
                 tv.text = s
                 return tv
@@ -262,7 +262,7 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
 
         mBinding.flHistory.setOnTagClickListener { _: View, position: Int, _: FlowLayout ->
             search(
-                mSearchHistory[position]
+                    mSearchHistory[position]
             )
             true
         }
@@ -281,48 +281,48 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
         get() {
             // 加载热词
             OkGo.get<String>("https://node.video.qq.com/x/api/hot_search") //        OkGo.<String>get("https://api.web.360kan.com/v1/rank")
-                //                .params("cat", "1")
-                .params("channdlId", "0").params("_", System.currentTimeMillis())
-                .execute(object : AbsCallback<String>() {
-                    override fun onSuccess(response: com.lzy.okgo.model.Response<String>) {
-                        try {
-                            val hots = ArrayList<String>()
-                            val itemList =
-                                JsonParser.parseString(response.body()).asJsonObject["data"].asJsonObject["mapResult"].asJsonObject["0"].asJsonObject["listInfo"].asJsonArray
-                            //                            JsonArray itemList = JsonParser.parseString(response.body()).getAsJsonObject().get("data").getAsJsonArray();
-                            for (ele in itemList) {
-                                val obj = ele as JsonObject
-                                hots.add(obj["title"].asString.trim { it <= ' ' }
-                                    .replace("[<>《》\\-]".toRegex(), "").split(" ".toRegex())
-                                    .dropLastWhile { it.isEmpty() }.toTypedArray()[0])
-                            }
-                            mBinding.flHot.adapter = object : TagAdapter<String>(hots) {
-                                override fun getView(
-                                    parent: FlowLayout, position: Int, s: String?
-                                ): View {
-                                    val tv = LayoutInflater.from(this@FastSearchActivity).inflate(
-                                        R.layout.item_search_word_hot, mBinding.flHot, false
-                                    ) as TextView
-                                    tv.text = s
-                                    return tv
+                    //                .params("cat", "1")
+                    .params("channdlId", "0").params("_", System.currentTimeMillis())
+                    .execute(object : AbsCallback<String>() {
+                        override fun onSuccess(response: com.lzy.okgo.model.Response<String>) {
+                            try {
+                                val hots = ArrayList<String>()
+                                val itemList =
+                                        JsonParser.parseString(response.body()).asJsonObject["data"].asJsonObject["mapResult"].asJsonObject["0"].asJsonObject["listInfo"].asJsonArray
+                                //                            JsonArray itemList = JsonParser.parseString(response.body()).getAsJsonObject().get("data").getAsJsonArray();
+                                for (ele in itemList) {
+                                    val obj = ele as JsonObject
+                                    hots.add(obj["title"].asString.trim { it <= ' ' }
+                                            .replace("[<>《》\\-]".toRegex(), "").split(" ".toRegex())
+                                            .dropLastWhile { it.isEmpty() }.toTypedArray()[0])
                                 }
-                            }
+                                mBinding.flHot.adapter = object : TagAdapter<String>(hots) {
+                                    override fun getView(
+                                            parent: FlowLayout, position: Int, s: String?
+                                    ): View {
+                                        val tv = LayoutInflater.from(this@FastSearchActivity).inflate(
+                                                R.layout.item_search_word_hot, mBinding.flHot, false
+                                        ) as TextView
+                                        tv.text = s
+                                        return tv
+                                    }
+                                }
 
-                            mBinding.flHot.setOnTagClickListener { _: View, position: Int, _: FlowLayout ->
-                                search(
-                                    hots[position]
-                                )
-                                true
+                                mBinding.flHot.setOnTagClickListener { _: View, position: Int, _: FlowLayout ->
+                                    search(
+                                            hots[position]
+                                    )
+                                    true
+                                }
+                            } catch (ignored: Throwable) {
                             }
-                        } catch (ignored: Throwable) {
                         }
-                    }
 
-                    @Throws(Throwable::class)
-                    override fun convertResponse(response: Response): String {
-                        return response.body()?.string() ?: ""
-                    }
-                })
+                        @Throws(Throwable::class)
+                        override fun convertResponse(response: Response): String {
+                            return response.body()?.string() ?: ""
+                        }
+                    })
         }
 
 
@@ -332,50 +332,50 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
     private fun getSuggest(text: String) {
         // 加载热词
         OkGo.get<String>("https://suggest.video.iqiyi.com/?if=mobile&key=$text")
-            .execute(object : AbsCallback<String>() {
-                override fun onSuccess(response: com.lzy.okgo.model.Response<String>) {
-                    val titles: MutableList<String> = ArrayList()
-                    try {
-                        val json = JsonParser.parseString(response.body()).asJsonObject
-                        val dataArray = json["data"].asJsonArray
-                        for (data in dataArray) {
-                            val item = data as JsonObject
-                            titles.add(item["name"].asString.trim { it <= ' ' })
+                .execute(object : AbsCallback<String>() {
+                    override fun onSuccess(response: com.lzy.okgo.model.Response<String>) {
+                        val titles: MutableList<String> = ArrayList()
+                        try {
+                            val json = JsonParser.parseString(response.body()).asJsonObject
+                            val dataArray = json["data"].asJsonArray
+                            for (data in dataArray) {
+                                val item = data as JsonObject
+                                titles.add(item["name"].asString.trim { it <= ' ' })
+                            }
+                        } catch (th: Throwable) {
+                            LogUtils.d(th.toString())
                         }
-                    } catch (th: Throwable) {
-                        LogUtils.d(th.toString())
+                        if (titles.isNotEmpty()) {
+                            showSuggestDialog(titles)
+                        }
                     }
-                    if (titles.isNotEmpty()) {
-                        showSuggestDialog(titles)
-                    }
-                }
 
-                @Throws(Throwable::class)
-                override fun convertResponse(response: Response): String {
-                    return response.body()?.string() ?: ""
-                }
-            })
+                    @Throws(Throwable::class)
+                    override fun convertResponse(response: Response): String {
+                        return response.body()?.string() ?: ""
+                    }
+                })
     }
 
     private var mSearchSuggestionsDialog: SearchSuggestionsDialog? = null
     private fun showSuggestDialog(list: List<String>) {
         if (mSearchSuggestionsDialog == null) {
             mSearchSuggestionsDialog = SearchSuggestionsDialog(
-                this@FastSearchActivity, list
+                    this@FastSearchActivity, list
             ) { _: Int, text: String ->
                 mSearchSuggestionsDialog?.dismissWith { search(text) }
             }
 
             XPopup.Builder(this@FastSearchActivity).atView(mBinding.etSearch)
-                .notDismissWhenTouchInView(mBinding.etSearch).isViewMode(true) //开启View实现
-                .isRequestFocus(false) //不强制焦点
-                .setPopupCallback(object : SimpleCallback() {
-                    override fun onDismiss(popupView: BasePopupView) {
-                        // 弹窗关闭了就置空对象,下次重新new
-                        super.onDismiss(popupView)
-                        mSearchSuggestionsDialog = null
-                    }
-                }).asCustom(mSearchSuggestionsDialog).show()
+                    .notDismissWhenTouchInView(mBinding.etSearch).isViewMode(true) //开启View实现
+                    .isRequestFocus(false) //不强制焦点
+                    .setPopupCallback(object : SimpleCallback() {
+                        override fun onDismiss(popupView: BasePopupView) {
+                            // 弹窗关闭了就置空对象,下次重新new
+                            super.onDismiss(popupView)
+                            mSearchSuggestionsDialog = null
+                        }
+                    }).asCustom(mSearchSuggestionsDialog).show()
         } else {
             // 不为空说明弹窗为打开状态(关闭就置空了).直接刷新数据
             mSearchSuggestionsDialog?.updateSuggestions(list)
@@ -419,7 +419,7 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
     }
 
     private fun initCheckedSourcesForSearch() {
-        mCheckSources = SearchHelper.getSourcesForSearch()
+        mCheckSources = SearchHelper.sourcesForSearch;
     }
 
     private fun search(title: String) {
@@ -534,8 +534,8 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
     private fun matchSearchResult(name: String, searchTitle: String): Boolean {
         if (TextUtils.isEmpty(name) || TextUtils.isEmpty(searchTitle)) return false
         val arr =
-            searchTitle.trim { it <= ' ' }.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }
-                .toTypedArray()
+                searchTitle.trim { it <= ' ' }.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }
+                        .toTypedArray()
         var matchNum = 0
         for (one in arr) {
             if (name.contains(one)) matchNum++
@@ -623,35 +623,35 @@ class FastSearchActivity : BaseVbActivity<ActivityFastSearchBinding>(), TextWatc
         }
         showLoadingDialog()
         OkGo.get<String>("https://api.themoviedb.org/3/search/movie?query=$vodName&include_adult=false&language=zh-ZH&page=1")
-            .headers("Authorization", "Bearer $token").tag("queryFromTMDB")
-            .execute(object : AbsCallback<String?>() {
-                @Throws(Throwable::class)
-                override fun convertResponse(response: Response): String {
-                    if (response.body() != null) {
-                        return response.body()!!.string()
-                    } else {
-                        throw IllegalStateException("网络请求错误")
+                .headers("Authorization", "Bearer $token").tag("queryFromTMDB")
+                .execute(object : AbsCallback<String?>() {
+                    @Throws(Throwable::class)
+                    override fun convertResponse(response: Response): String {
+                        if (response.body() != null) {
+                            return response.body()!!.string()
+                        } else {
+                            throw IllegalStateException("网络请求错误")
+                        }
                     }
-                }
 
-                override fun onSuccess(response: com.lzy.okgo.model.Response<String?>) {
-                    dismissLoadingDialog()
-                    val json = response.body()
-                    val videoInfo = GsonUtils.fromJson(json, TmdbVodInfo::class.java)
-                    val results = videoInfo.results
-                    if (results != null && results.isNotEmpty()) {
-                        XPopup.Builder(this@FastSearchActivity)
-                            .asCustom(TmdbVodInfoDialog(this@FastSearchActivity, results[0])).show()
-                    } else {
-                        ToastUtils.showShort("未查询到相关信息")
+                    override fun onSuccess(response: com.lzy.okgo.model.Response<String?>) {
+                        dismissLoadingDialog()
+                        val json = response.body()
+                        val videoInfo = GsonUtils.fromJson(json, TmdbVodInfo::class.java)
+                        val results = videoInfo.results
+                        if (results != null && results.isNotEmpty()) {
+                            XPopup.Builder(this@FastSearchActivity)
+                                    .asCustom(TmdbVodInfoDialog(this@FastSearchActivity, results[0])).show()
+                        } else {
+                            ToastUtils.showShort("未查询到相关信息")
+                        }
                     }
-                }
 
-                override fun onError(response: com.lzy.okgo.model.Response<String?>) {
-                    super.onError(response)
-                    dismissLoadingDialog()
-                }
-            })
+                    override fun onError(response: com.lzy.okgo.model.Response<String?>) {
+                        super.onError(response)
+                        dismissLoadingDialog()
+                    }
+                })
     }
 
     companion object {

@@ -53,7 +53,9 @@ class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
     override fun init() {
         ControlManager.get().startServer()
 
+        //点击选择数据源
         mBinding.nameContainer.setOnClickListener {
+            //TODO:拦截快速点击
             if (dataInitOk && jarInitOk) {
                 showSiteSwitch()
             } else {
@@ -61,6 +63,7 @@ class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
             }
         }
 
+        //长按刷新
         mBinding.nameContainer.setOnLongClickListener {
             refreshHomeSources()
             true
@@ -112,7 +115,6 @@ class HomeFragment : BaseVbFragment<FragmentHomeBinding>() {
         val home = ApiConfig.get().homeSourceBean
         if (home != null && home.name != null && home.name.isNotEmpty()) {
             mBinding.tvName.text = home.name
-            mBinding.tvName.postDelayed({ mBinding.tvName.isSelected = true }, 2000)
         }
         if (dataInitOk && jarInitOk) {
             showLoading()

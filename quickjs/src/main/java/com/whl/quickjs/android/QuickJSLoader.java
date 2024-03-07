@@ -7,7 +7,7 @@ public final class QuickJSLoader {
 
     public static void init(Boolean bool) {
         System.loadLibrary("quickjs-android-wrapper");
-        if (bool.booleanValue()) {
+        if (bool) {
             startRedirectingStdoutStderr("QuJs ==> ");
         }
     }
